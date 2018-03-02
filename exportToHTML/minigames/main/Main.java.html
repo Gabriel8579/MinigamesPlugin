@@ -1,0 +1,136 @@
+<html>
+<head>
+<title>Main.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #606366; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(204,120,50); }
+.s1 { color: rgb(169,183,198); }
+.s2 { color: rgb(128,128,128); }
+.s3 { color: rgb(106,135,89); }
+</style>
+</head>
+<BODY BGCOLOR="#2b2b2b">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+Main.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">package </span><span class="s1">minigames.main</span><span class="s0">;</span><span class="s1"> 
+ 
+</span><span class="s0">import </span><span class="s1">minigames.date.Date</span><span class="s0">;</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">minigames.worlds.WorldCommand</span><span class="s0">;</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">minigames.worlds.WorldGui</span><span class="s0">;</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">org.bukkit.*</span><span class="s0">;</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">org.bukkit.event.Listener</span><span class="s0">;</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">org.bukkit.plugin.PluginManager</span><span class="s0">;</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">org.bukkit.plugin.java.JavaPlugin</span><span class="s0">;</span><span class="s1"> 
+ 
+</span><span class="s0">import </span><span class="s1">java.sql.*</span><span class="s0">;</span><span class="s1"> 
+ 
+</span><span class="s0">public class </span><span class="s1">Main </span><span class="s0">extends </span><span class="s1">JavaPlugin { 
+ 
+    </span><span class="s0">public static </span><span class="s1">Connection c</span><span class="s0">;</span><span class="s1"> 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onEnable() { 
+ 
+        PluginManager pm = Bukkit.getPluginManager()</span><span class="s0">;</span><span class="s1"> 
+        pm.registerEvents(</span><span class="s0">new </span><span class="s1">WorldGui()</span><span class="s0">, this</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s2">// pm.registerEvents(listener, this);</span><span class="s1"> 
+ 
+        DataBase.createDb()</span><span class="s0">;</span><span class="s1"> 
+        c =  DataBase.getConnection()</span><span class="s0">;</span><span class="s1"> 
+ 
+        getCommand(</span><span class="s3">&quot;mundo&quot;</span><span class="s1">).setExecutor(</span><span class="s0">new </span><span class="s1">WorldCommand())</span><span class="s0">;</span><span class="s1"> 
+ 
+ 
+ 
+        </span><span class="s0">for</span><span class="s1">(World w : Bukkit.getWorlds()){ 
+ 
+            </span><span class="s0">if</span><span class="s1">(!w.getName().contains(</span><span class="s3">&quot;_nether&quot;</span><span class="s1">) &amp;&amp; !w.getName().contains(</span><span class="s3">&quot;_end&quot;</span><span class="s1">)) { 
+ 
+                Statement st = </span><span class="s0">null;</span><span class="s1"> 
+                </span><span class="s0">try </span><span class="s1">{ 
+                    st = Main.c.createStatement()</span><span class="s0">;</span><span class="s1"> 
+                    ResultSet res = st.executeQuery(</span><span class="s3">&quot;SELECT * FROM worldsData;&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+ 
+                    </span><span class="s0">boolean </span><span class="s1">mainWorld = </span><span class="s0">false;</span><span class="s1"> 
+                    </span><span class="s0">while </span><span class="s1">(res.next()) { 
+                        </span><span class="s0">if </span><span class="s1">(res.getString(</span><span class="s3">&quot;Name&quot;</span><span class="s1">).equals(w.getName())) { 
+                            mainWorld = </span><span class="s0">true;</span><span class="s1"> 
+                        } 
+                    } 
+                    </span><span class="s0">if </span><span class="s1">(mainWorld == </span><span class="s0">false</span><span class="s1">) { 
+                        String codeSql = </span><span class="s3">&quot;INSERT INTO worldsData VALUES (null,'&quot; </span><span class="s1">+ w.getName() + </span><span class="s3">&quot;','&quot; </span><span class="s1">+ Date.getLongDate() + </span><span class="s3">&quot;','Server','Nenhum','true');&quot;</span><span class="s0">;</span><span class="s1"> 
+                        PreparedStatement ps = c.prepareStatement(codeSql)</span><span class="s0">;</span><span class="s1"> 
+                        ps.executeUpdate()</span><span class="s0">;</span><span class="s1"> 
+ 
+                    } 
+                    res.close()</span><span class="s0">;</span><span class="s1"> 
+                    st.close()</span><span class="s0">;</span><span class="s1"> 
+ 
+                } </span><span class="s0">catch </span><span class="s1">(SQLException e) { 
+                    e.printStackTrace()</span><span class="s0">;</span><span class="s1"> 
+                } 
+ 
+            } 
+ 
+ 
+        } 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        Statement st = </span><span class="s0">null;</span><span class="s1"> 
+        </span><span class="s0">try </span><span class="s1">{ 
+            st = Main.c.createStatement()</span><span class="s0">;</span><span class="s1"> 
+            ResultSet res = st.executeQuery(</span><span class="s3">&quot;SELECT * FROM worldsData;&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+ 
+            </span><span class="s0">while </span><span class="s1">(res.next()){ 
+ 
+                String n = res.getString(</span><span class="s3">&quot;Name&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                Bukkit.createWorld(</span><span class="s0">new </span><span class="s1">WorldCreator(n))</span><span class="s0">;</span><span class="s1"> 
+                System.out.println(</span><span class="s3">&quot;Mundo com o ID #&quot;</span><span class="s1">+res.getString(</span><span class="s3">&quot;id&quot;</span><span class="s1">) +</span><span class="s3">&quot; foi carregado!&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+ 
+ 
+ 
+            } 
+ 
+ 
+ 
+ 
+ 
+            res.close()</span><span class="s0">;</span><span class="s1"> 
+            st.close()</span><span class="s0">;</span><span class="s1"> 
+ 
+ 
+        } </span><span class="s0">catch </span><span class="s1">(SQLException e) { 
+            e.printStackTrace()</span><span class="s0">;</span><span class="s1"> 
+        } 
+ 
+ 
+ 
+ 
+        </span><span class="s0">super</span><span class="s1">.onEnable()</span><span class="s0">;</span><span class="s1"> 
+    } 
+ 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onDisable() { 
+ 
+        </span><span class="s0">try </span><span class="s1">{ 
+            c.close()</span><span class="s0">;</span><span class="s1"> 
+        } </span><span class="s0">catch </span><span class="s1">(SQLException e) { 
+            e.printStackTrace()</span><span class="s0">;</span><span class="s1"> 
+        } 
+        </span><span class="s0">super</span><span class="s1">.onDisable()</span><span class="s0">;</span><span class="s1"> 
+    } 
+} 
+</span></pre>
+</body>
+</html>

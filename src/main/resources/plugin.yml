@@ -1,0 +1,6 @@
+name: MinigamePlugin
+main: minigames.main.Main
+author: Lucas_gamer13
+version: 1.0
+commands:
+  mundo:
