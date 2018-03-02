@@ -14,7 +14,7 @@ public class Date {
 
         Locale locale = new Locale("pt","BR");
         java.util.Date d = new java.util.Date();
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY - HH:mm:ss",locale);
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss",locale);
 
 
 
@@ -26,7 +26,7 @@ public class Date {
     public static Long getLongDate(){
         Locale locale = new Locale("pt","BR");
         java.util.Date d = new java.util.Date();
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY - HH:mm:ss",locale);
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss",locale);
 
     return d.getTime();
 
@@ -36,9 +36,7 @@ public class Date {
     public static String getLongToDateString(Long l){
 
         java.util.Date d = new java.util.Date(l);
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY - HH:mm:ss");
-
-
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss");
         return df.format(d);
 
     }

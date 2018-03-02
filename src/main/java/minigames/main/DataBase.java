@@ -62,10 +62,10 @@ public class DataBase
         String sql2 = "CREATE TABLE IF NOT EXISTS worldsData (\r\n" +
                 "	id	INTEGER PRIMARY KEY AUTOINCREMENT,\r\n" +
                 "	Name	VARCHAR ( 64 ) NOT NULL,\r\n" +
-                "	CreationDate	VARCHAR ( 64 ),\r\n" +
+                "	CreationDate	BIGINT ( 64 ),\r\n" +
                 "	CreationBy	VARCHAR ( 64 ),\r\n" +
                 "	Minigame	VARCHAR ( 64 ),\r\n" +
-                "   Online VARCHAR(64)\r\n" +
+                "   Online TINYINT(1)\r\n" +
                 ");";
         try
 

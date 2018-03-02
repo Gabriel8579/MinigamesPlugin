@@ -1,6 +1,7 @@
 name: MinigamePlugin
 main: minigames.main.Main
-author: Lucas_gamer13
+authors: [Lucas_gamer13, Gabriel8579]
 version: 1.0
 commands:
   mundo:
+    description: Crie ou edite um novo mundo.
