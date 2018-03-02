@@ -1,16 +1,17 @@
 package minigames.worlds;
 
-import minigames.date.Date;
 import minigames.main.Main;
 import minigames.main.Messages;
-import org.bukkit.Bukkit;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,22 +28,27 @@ public class WorldCommand implements CommandExecutor {
             if(p.isOp()){
             if(args.length == 0){
                 Messages.sendMessage(p, Messages.MessageType.WORLD, "Você pode usar /mundo <nome> para editar ou criar um novo! Lista de mundos:");
-                Statement st = null;
+                Statement st;
                 try {
                     st = Main.c.createStatement();
                     ResultSet res = st.executeQuery("SELECT * FROM worldsData;");
-                    String mundos = "";
                     while(res.next()){
                         if(res.getBoolean("Online")) {
-                            mundos = mundos + ChatColor.GOLD + res.getString("Name") + ", ";
-                            TextComponent t;
-                            t = new TextComponent( ChatColor.GOLD + res.getString("Name") + ", ");
-
+                            TextComponent t = new TextComponent(ChatColor.GOLD + res.getString("Name") + ", ");
+                            ClickEvent cv = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mundo " + res.getString("Name"));
+                            HoverEvent hv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.WHITE + "Clique aqui para editar este mundo").create());
+                            t.setClickEvent(cv);
+                            t.setHoverEvent(hv);
+                            p.spigot().sendMessage(t);
                         }else{
-                            mundos = mundos + ChatColor.GRAY + res.getString("Name") + ", ";
+                            TextComponent t = new TextComponent(ChatColor.GRAY + res.getString("Name") + ", ");
+                            ClickEvent cv = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mundo " + res.getString("Name"));
+                            HoverEvent hv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.WHITE + "Clique aqui para editar este mundo").create());
+                            t.setClickEvent(cv);
+                            t.setHoverEvent(hv);
+                            p.spigot().sendMessage(t);
                         }
                     }
-                    Messages.sendMessage(p, Messages.MessageType.WORLD, mundos);
                     res.close();
                     st.close();
                 } catch (SQLException e) {
@@ -54,12 +60,7 @@ public class WorldCommand implements CommandExecutor {
             }else{
                 Messages.sendMessage(p, Messages.MessageType.WORLD, "Você não pode usar esse comando!");
             }
-
-
         }
-
-
-
         return false;
 
 

@@ -42,17 +42,37 @@ public class WorldGui implements Listener {
                 grassLore.add(ChatColor.AQUA+"Data de criação: " + Date.getLongToDateString(res.getLong("CreationDate")));
                 grassLore.add(ChatColor.AQUA+"Criado por: " + res.getString("CreationBy"));
                 grassLore.add(ChatColor.AQUA+"Minigame: " + res.getString("Minigame"));
-                grassLore.add(ChatColor.AQUA+"Online: " + res.getBoolean("Online"));
+                grassLore.add(ChatColor.AQUA + "Online: " + simNao(res.getBoolean("Online")));
                 grassMeta.setLore(grassLore);
                 grassMeta.setDisplayName(ChatColor.GREEN+worldName);
                 grass.setItemMeta(grassMeta);
 
                 p.getOpenInventory().setItem(4, grass);
             } else {
+                ItemStack grass = new ItemStack(Material.GRASS);
+                ItemMeta grassMeta = grass.getItemMeta();
+                ArrayList<String> grassLore = new ArrayList<String>();
+                grassLore.add(ChatColor.AQUA + "Nome: " + worldName);
+                grassLore.add(ChatColor.AQUA + "Data de criação: " + Date.getStringDate());
+                grassLore.add(ChatColor.AQUA + "Criado por: " + p.getDisplayName());
+                grassLore.add(ChatColor.AQUA + "Minigame: Nenhum");
+                grassLore.add(ChatColor.AQUA + "Online: Sim");
+                grassMeta.setLore(grassLore);
+                grassMeta.setDisplayName(ChatColor.GREEN + worldName);
+                grass.setItemMeta(grassMeta);
 
+                p.getOpenInventory().setItem(4, grass);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String simNao(boolean a) {
+        String b = "Não";
+        if (a) {
+            b = "Sim";
+        }
+        return b;
     }
 }

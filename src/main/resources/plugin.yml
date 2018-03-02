@@ -4,4 +4,3 @@ authors: [Lucas_gamer13, Gabriel8579]
 version: 1.0
 commands:
   mundo:
-    description: Crie ou edite um novo mundo.
