@@ -1,5 +1,6 @@
 package minigames.util;
 
+import minigames.date.Date;
 import minigames.main.Main;
 import minigames.main.Messages;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -13,6 +14,8 @@ import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,11 +76,24 @@ public class RoomManager {
             return;
         }
         World w = Bukkit.getWorld(res.getString("World") + "-" + r);
-        Bukkit.unloadWorld(w, false);
-        File wfile = new File(String.valueOf(w.getWorldFolder()));
-        wfile.delete();
         s.execute("DELETE FROM roomsData WHERE Name='" + r + "';");
         s.execute("DELETE FROM worldsData WHERE Name='" + w.getName() + "-" + r + "';");
+        for (Player s2 : Bukkit.getOnlinePlayers()) {
+            if (getRoom(s2).equalsIgnoreCase(r)) {
+                String[] sla = r.split("-");
+                String bb = getBestRoom(p, sla[0]);
+                if (bb != null) {
+                    setRoom(s2, r, bb);
+                    Messages.sendMessage(s2, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
+                } else {
+                    setRoom(s2, r, getBestRoom(s2, getBestRoom(p, "Hub")));
+                    Messages.sendMessage(s2, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
+                }
+            }
+        }
+        unloadWorld(w);
+        File wfile = getWorldFile(w.getName());
+        deleteWorld(getWorldFile(w.getName()));
         res.close();
         s.close();
         Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala excluida com sucesso");
@@ -172,12 +188,6 @@ public class RoomManager {
         World w = Bukkit.getWorld(res2.getString("Name") + "-" + r2);
         p.teleport(new Location(w, res2.getDouble("X"), res2.getDouble("Y"), res2.getDouble("Z")));
         Messages.sendMessage(p, Messages.MessageType.ROOM, "Você mudou de " + r1 + " para " + r2);
-        for (Player s2 : Bukkit.getOnlinePlayers()) {
-            if (getRoom(s2).equalsIgnoreCase(r1)) {
-                s2.hidePlayer(p);
-                Messages.sendMessage(p, Messages.MessageType.ROOM, "O jogador " + p.getDisplayName() + " deixou a sala.");
-            }
-        }
         res.close();
         res2.close();
         s.close();
@@ -205,24 +215,18 @@ public class RoomManager {
                 Statement s = Main.c.createStatement();
                 ResultSet res = s.executeQuery("SELECT World FROM roomsData WHERE Name='" + r + "';");
                 if (res.next()) {
-                    World wo = Bukkit.getWorld(res.getString("World"));
-                    World w = Bukkit.getWorld(res.getString("World") + "-" + r);
-                    File worldpath = new File(String.valueOf(wo.getWorldFolder()));
-                    File wfile = new File(String.valueOf(wo.getWorldFolder()));
-                    Bukkit.unloadWorld(w, false);
-                    wfile.delete();
-                    w.setAutoSave(false);
-                    copy(worldpath, wfile);
-                    w.setAutoSave(true);
-                    Bukkit.getServer().createWorld(new WorldCreator(res.getString("World") + "-" + r));
+                    File worldpath = getWorldFile(res.getString("World"));
+                    File wfile = getWorldFile(res.getString("World") + "-" + r);
+                    unloadWorld(Bukkit.getWorld(res.getString("World") + "-" + r));
+                    deleteWorld(wfile);
+                    copyWorld(worldpath, wfile);
+                    loadWorld(res.getString("World") + "-" + r);
                     openRoom(null, r);
                     return;
                 }
                 return;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -236,23 +240,22 @@ public class RoomManager {
         try {
             if (!isCreated(rn)) {
                 Statement s = Main.c.createStatement();
+                World w = Bukkit.getWorld(wn);
+                if (w == null) {
+                    Messages.sendMessage(p, Messages.MessageType.ROOM, ChatColor.RED + "Mundo não encontrado!");
+                    return;
+                }
                 s.execute("INSERT INTO roomsData (id, Name, World, Open, Role) VALUES (NULL, '" + rn + "','" + wn + "'," + a + ",'" + role + "');");
+                s.execute("INSERT INTO worldsData (id,Name,CreationDate,CreationBy,Minigame,X,Y,Z,Online) VALUES (NULL,'" + wn + "-" + rn + "','" + Date.getLongDate() + "','" + p.getDisplayName() + "','Nenhum','" + w.getSpawnLocation().getX() + "', '" + w.getSpawnLocation().getY() + "','" + w.getSpawnLocation().getZ() + "', 1);");
                 s.close();
-                World world = Bukkit.getWorld(wn);
-                File worldpath = new File(String.valueOf(world.getWorldFolder()));
-                File dir = new File(String.valueOf(worldpath));
-                String roomdir = worldpath + "-" + rn;
-                File roomd = new File(roomdir);
-                world.setAutoSave(false);
-                copy(dir, roomd);
-                world.setAutoSave(true);
-                Bukkit.getServer().createWorld(new WorldCreator(wn + "-" + rn));
+                File dir = getWorldFile(wn);
+                File roomd = getWorldFile(wn + "-" + rn);
+                copyWorld(dir, roomd);
+                loadWorld(wn + "-" + rn);
             } else {
                 return;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
         if (op) {
@@ -274,7 +277,6 @@ public class RoomManager {
             if (getRoom(s).equalsIgnoreCase(r)) {
                 p.showPlayer(s);
                 s.showPlayer(p);
-                Messages.sendMessage(s, Messages.MessageType.ROOM, "O jogador " + p.getDisplayName() + " entrou na sala.");
             } else {
                 p.hidePlayer(s);
                 s.hidePlayer(p);
@@ -283,36 +285,62 @@ public class RoomManager {
         return;
     }
 
-    public static void copy(File sourceLocation, File targetLocation) throws IOException {
-        if (sourceLocation.isDirectory()) {
-            copyDirectory(sourceLocation, targetLocation);
-        } else {
-            copyFile(sourceLocation, targetLocation);
+    public static void loadWorld(String nw) {
+        Bukkit.getServer().createWorld(new WorldCreator(nw));
+    }
+
+    private static File getWorldFile(String wn) {
+        System.out.println(Bukkit.getWorldContainer().getAbsolutePath().replace("\\", "/").replace("/./", "/") + "/" + wn);
+        return new File(Bukkit.getWorldContainer().getAbsolutePath().replace("\\", "/").replace("/./", "/") + "/" + wn);
+    }
+
+    private static void unloadWorld(World world) {
+        if (!world.equals(null)) {
+            Bukkit.getServer().unloadWorld(world, false);
+            System.out.println(world.getName() + " unloaded!");
         }
     }
 
-    private static void copyDirectory(File source, File target) throws IOException {
-        if (!target.exists()) {
-            target.mkdir();
-        }
-
-        for (String f : source.list()) {
-            if (!f.equalsIgnoreCase("level.dat") && !f.equalsIgnoreCase("uid.dat") && !f.equalsIgnoreCase("session.lock")) {
-                copy(new File(source, f), new File(target, f));
+    private static boolean deleteWorld(File path) {
+        if (path.exists()) {
+            File files[] = path.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteWorld(files[i]);
+                } else {
+                    files[i].delete();
+                }
             }
         }
+        return (path.delete());
     }
 
-    private static void copyFile(File source, File target) throws IOException {
-        try (
-                InputStream in = new FileInputStream(source);
-                OutputStream out = new FileOutputStream(target)
-        ) {
-            byte[] buf = new byte[1024];
-            int length;
-            while ((length = in.read(buf)) > 0) {
-                out.write(buf, 0, length);
+    private static void copyWorld(File source, File target) {
+        try {
+            ArrayList<String> ignore = new ArrayList<String>(Arrays.asList("uid.dat", "session.dat"));
+            if (!ignore.contains(source.getName())) {
+                if (source.isDirectory()) {
+                    if (!target.exists())
+                        target.mkdirs();
+                    String files[] = source.list();
+                    for (String file : files) {
+                        File srcFile = new File(source, file);
+                        File destFile = new File(target, file);
+                        copyWorld(srcFile, destFile);
+                    }
+                } else {
+                    InputStream in = new FileInputStream(source);
+                    OutputStream out = new FileOutputStream(target);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = in.read(buffer)) > 0)
+                        out.write(buffer, 0, length);
+                    in.close();
+                    out.close();
+                }
             }
+        } catch (IOException e) {
+
         }
     }
 }
