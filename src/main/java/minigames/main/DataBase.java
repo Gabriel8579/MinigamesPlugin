@@ -6,11 +6,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.bukkit.Bukkit;
 
 public class DataBase
 {
-    public static String url = "jdbc:sqlite:" + Bukkit.getWorldContainer().getAbsolutePath().replace("\\", "/") + "/database/db.db";
+    public static String url = "jdbc:sqlite:" + Main.pl.getDataFolder().getAbsolutePath().replace("\\", "/") + "/database/db.db";
 
     public static void createDb()
     {
@@ -22,11 +21,11 @@ public class DataBase
         {
             e.printStackTrace();
         }
-        File dir = new File(Bukkit.getWorldContainer().getAbsolutePath().replace("\\", "/") + "/database");
+        File dir = new File(Main.pl.getDataFolder() + "/database");
         if (!dir.exists()) {
-            dir.mkdir();
+            dir.mkdirs();
         }
-        File db = new File(Bukkit.getWorldContainer().getAbsolutePath().replace("\\", "/") + "/database/db.db");
+        File db = new File(Main.pl.getDataFolder() + "/database/db.db");
         if (!db.exists()) {
             try
             {
@@ -39,13 +38,17 @@ public class DataBase
         }
         try
         {
-            Main.c = DriverManager.getConnection(url);
+            Connection c = DriverManager.getConnection(url);
+            if (c != null) {
+                c.close();
+                c = null;
+            }
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
-        createTable();
+
     }
 
     public static void createTable()
@@ -56,7 +59,7 @@ public class DataBase
                 "	UUID	VARCHAR ( 36 ),\r\n" +
                 "	IP	VARCHAR ( 15 ),\r\n" +
                 "	Email	VARCHAR ( 64 ),\r\n" +
-                "   Roles    VARCHAR ( 64 )\r\n"+
+                "   Roles    VARCHAR ( 500 )\r\n" +
                 ");";
 
         String sql2 = "CREATE TABLE IF NOT EXISTS worldsData (\r\n" +
@@ -65,22 +68,25 @@ public class DataBase
                 "	CreationDate	BIGINT ( 64 ),\r\n" +
                 "	CreationBy	VARCHAR ( 64 ),\r\n" +
                 "	Minigame	VARCHAR ( 64 ),\r\n" +
+                "   X DOUBLE(20)," +
+                "   Y DOUBLE(20)," +
+                "   Z DOUBLE(20)," +
                 "   Online TINYINT(1)\r\n" +
                 ");";
+        String sql3 = "CREATE TABLE IF NOT EXISTS roomsData (" +
+                " id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " Name VARCHAR (36) NOT NULL," +
+                " World VARCHAR (64) NOT NULL," +
+                " Open TINYINT (1)," +
+                " Role VARCHAR(64));";
+
         try
-
-
         {
-            Class.forName("org.sqlite.JDBC");
-            Connection con = DriverManager.getConnection(url);
-            Statement st = con.createStatement();
+            Statement st = Main.c.createStatement();
             st.execute(sql);
             st.execute(sql2);
+            st.execute(sql3);
             st.close();
-        }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
         }
         catch (SQLException e)
         {

@@ -4,3 +4,8 @@ authors: [Lucas_gamer13, Gabriel8579]
 version: 1.0
 commands:
   mundo:
+    description: Crie, liste e edite mundos.
+  sala:
+    description: Entre em uma sala ou veja em qual sala voce esta.
+  adm:
+    description: Comando para administradores.

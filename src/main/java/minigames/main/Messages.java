@@ -6,17 +6,20 @@ import org.bukkit.entity.Player;
 public class Messages {
 
 
-    public static enum MessageType{
-        WORLD;
+    public static void sendMessage(Player p, MessageType MessageType, String msg){
+
+        if (MessageType == Messages.MessageType.WORLD) {
+            p.sendMessage(ChatColor.DARK_BLUE+"["+ChatColor.BLUE+"Mundos"+ChatColor.DARK_BLUE+"] > "+ChatColor.GREEN+msg);
+        }
+        if (MessageType == Messages.MessageType.ROOM) {
+            p.sendMessage(ChatColor.DARK_BLUE + "[" + ChatColor.BLUE + "Sala" + ChatColor.DARK_BLUE + "] > " + ChatColor.GREEN + msg);
+        }
+
     }
 
 
-    public static void sendMessage(Player p, MessageType MessageType, String msg){
-
-        if(MessageType == MessageType.WORLD){
-            p.sendMessage(ChatColor.DARK_BLUE+"["+ChatColor.BLUE+"Mundos"+ChatColor.DARK_BLUE+"] > "+ChatColor.GREEN+msg);
-        }
-
+    public enum MessageType {
+        WORLD, ROOM
     }
 
 
