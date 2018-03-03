@@ -1,9 +1,12 @@
 package minigames.util;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.sql.SQLException;
 
 public class AdmCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -45,6 +48,79 @@ public class AdmCommand implements CommandExecutor {
                 RoomManager.createRoom(p, args[1], args[2], args[3], op);
                 return false;
             }
+            if (args[0].equalsIgnoreCase("closeroom")) {
+                if (args.length != 2) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-closeroom <nome>: Fecha a sala;");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome da sala;");
+                    return false;
+                }
+                try {
+                    RoomManager.closeRoom(p, args[1]);
+                    return false;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (args[0].equalsIgnoreCase("openroom")) {
+                if (args.length != 2) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-openroom <nome>: Abre a sala;");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome da sala;");
+                    return false;
+                }
+                try {
+                    RoomManager.openRoom(p, args[1]);
+                    return false;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (args[0].equalsIgnoreCase("sendroom")) {
+                if (args.length != 3) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-sendroom <player> <nome>: Envia um player a uma sala;");
+                    p.sendMessage("§6ADM> §b--<player>: Nome do jogador;");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome da sala;");
+                    return false;
+                }
+                if (!(Bukkit.getPlayer(args[1]) instanceof Player)) {
+                    p.sendMessage("§4ADM> §cJogador não está online!");
+                    return false;
+                }
+                Player a = Bukkit.getPlayer(args[1]);
+                try {
+                    RoomManager.setRoom(a, RoomManager.getRoom(a), args[2]);
+                    return false;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (args[0].equalsIgnoreCase("deleteroom")) {
+                if (args.length != 2) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-deleteroom <nome>: Deleta uma sala.;");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome da sala;");
+                    return false;
+                }
+                try {
+                    RoomManager.deleteRoom(p, args[1]);
+                    return false;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (args[0].equalsIgnoreCase("restartroom")) {
+                if (args.length != 2) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-restartroom <nome>: Reinicia uma sala.;");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome da sala;");
+                    return false;
+                }
+                RoomManager.restartRoom(p, args[1]);
+                return false;
+            }
+
         }
         return false;
     }

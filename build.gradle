@@ -9,7 +9,6 @@ repositories {
         name 'Spigot'
         url 'https://hub.spigotmc.org/nexus/content/groups/public/'
     }
-
     maven {
         name 'BungeeCord'
         url 'https://oss.sonatype.org/content/repositories/snapshots'
