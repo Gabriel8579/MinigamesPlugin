@@ -68,7 +68,17 @@ public class RoomManager {
             return;
         }
         Statement s = Main.c.createStatement();
+        ResultSet res = s.executeQuery("SELECT * FROM roomsData WHERE Name='" + r + "';");
+        if (!res.next()) {
+            return;
+        }
+        World w = Bukkit.getWorld(res.getString("World") + "-" + r);
+        Bukkit.unloadWorld(w, false);
+        File wfile = new File(String.valueOf(w.getWorldFolder()));
+        wfile.delete();
         s.execute("DELETE FROM roomsData WHERE Name='" + r + "';");
+        s.execute("DELETE FROM worldsData WHERE Name='" + w.getName() + "-" + r + "';");
+        res.close();
         s.close();
         Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala excluida com sucesso");
     }
@@ -81,7 +91,9 @@ public class RoomManager {
         Statement s = Main.c.createStatement();
         s.execute("UPDATE roomsData SET Open=0 WHERE Name='" + r + "';");
         s.close();
-        Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala fechada com sucesso");
+        if (p != null) {
+            Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala fechada com sucesso");
+        }
     }
 
     public static void openRoom(Player p, String r) throws SQLException {
@@ -92,7 +104,6 @@ public class RoomManager {
         Statement s = Main.c.createStatement();
         s.execute("UPDATE roomsData SET Open=1 WHERE Name='" + r + "';");
         s.close();
-        Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala aberta com sucesso");
         TextComponent t = new TextComponent("§1[§9Sala§1] > §7A sala " + r + " acabou de abrir. Clique aqui para entrar.");
         HoverEvent hv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§fClique aqui para entrar em §b" + r).create());
         ClickEvent cv = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sala " + r);
@@ -100,6 +111,9 @@ public class RoomManager {
         t.setClickEvent(cv);
         for (Player s2 : Bukkit.getOnlinePlayers()) {
             s2.spigot().sendMessage(t);
+        }
+        if (p != null) {
+            Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala fechada com sucesso");
         }
     }
 
@@ -119,15 +133,12 @@ public class RoomManager {
     public static String getBestRoom(Player p, String r) throws SQLException {
         Statement s = Main.c.createStatement();
         ResultSet res = s.executeQuery("SELECT * FROM roomsData WHERE Name LIKE '%" + r + "%';");
-        if (res.next()) {
+        while (res.next()) {
             if (isOpen(res.getString("Name"))) {
                 if (canJoin(p, res.getString("Name"))) {
                     return res.getString("Name");
                 }
-                return null;
             }
-            return null;
-
         }
         return null;
     }
@@ -177,15 +188,18 @@ public class RoomManager {
     public static void restartRoom(Player p, String r) {
         try {
             if (isCreated(r)) {
+                closeRoom(null, r);
                 for (Player s : Bukkit.getOnlinePlayers()) {
-                    String[] sla = r.split("-");
-                    String bb = getBestRoom(p, sla[0]);
-                    if (bb != null) {
-                        setRoom(s, r, bb);
-                        Messages.sendMessage(s, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
-                    } else {
-                        setRoom(s, r, getBestRoom(s, getBestRoom(p, "Hub")));
-                        Messages.sendMessage(s, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
+                    if (getRoom(s).equalsIgnoreCase(r)) {
+                        String[] sla = r.split("-");
+                        String bb = getBestRoom(p, sla[0]);
+                        if (bb != null) {
+                            setRoom(s, r, bb);
+                            Messages.sendMessage(s, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
+                        } else {
+                            setRoom(s, r, getBestRoom(s, getBestRoom(p, "Hub")));
+                            Messages.sendMessage(s, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
+                        }
                     }
                 }
                 Statement s = Main.c.createStatement();
@@ -201,6 +215,7 @@ public class RoomManager {
                     copy(worldpath, wfile);
                     w.setAutoSave(true);
                     Bukkit.getServer().createWorld(new WorldCreator(res.getString("World") + "-" + r));
+                    openRoom(null, r);
                     return;
                 }
                 return;
@@ -258,9 +273,11 @@ public class RoomManager {
         for (Player s : Bukkit.getOnlinePlayers()) {
             if (getRoom(s).equalsIgnoreCase(r)) {
                 p.showPlayer(s);
+                s.showPlayer(p);
                 Messages.sendMessage(s, Messages.MessageType.ROOM, "O jogador " + p.getDisplayName() + " entrou na sala.");
             } else {
                 p.hidePlayer(s);
+                s.hidePlayer(p);
             }
         }
         return;
