@@ -23,10 +23,10 @@ public class Join implements Listener {
         }
         res.close();
         s.close();
-        if (!RankManager.containsRole(p, "Normal")) {
-            RankManager.setRole(p, "Normal");
+        if (!RankManager.containsRole(p.getName(), "Normal")) {
+            RankManager.setRole(p.getName(), "Normal");
         }
-        String br = RoomManager.getBestRoom(p, "Hub");
+        String br = RoomManager.getBestRoom(p, Main.phub);
         if (br != null) {
             RoomManager.setRoom(p, "???", br);
         }

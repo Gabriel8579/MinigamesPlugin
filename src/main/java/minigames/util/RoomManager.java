@@ -84,10 +84,10 @@ public class RoomManager {
                 String bb = getBestRoom(p, sla[0]);
                 if (bb != null) {
                     setRoom(s2, r, bb);
-                    Messages.sendMessage(s2, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
+                    Messages.sendMessage(s2, Messages.MessageType.ROOM, "A sala que você estava agora esta fechada. Você foi movido para outra sala.");
                 } else {
-                    setRoom(s2, r, getBestRoom(s2, getBestRoom(p, "Hub")));
-                    Messages.sendMessage(s2, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
+                    setRoom(s2, r, getBestRoom(s2, getBestRoom(p, Main.phub)));
+                    Messages.sendMessage(s2, Messages.MessageType.ROOM, "A sala que você estava agora esta fechada. Você foi movido para outra sala.");
                 }
             }
         }
@@ -112,6 +112,16 @@ public class RoomManager {
         }
     }
 
+    public static int getPlayersInRoom(String room) {
+        int i = 0;
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (getRoom(p).equalsIgnoreCase(room)) {
+                i++;
+            }
+        }
+        return i;
+    }
+
     public static void openRoom(Player p, String r) throws SQLException {
         if (isOpen(r)) {
             Messages.sendMessage(p, Messages.MessageType.ROOM, ChatColor.RED + "Esta sala já está aberta!");
@@ -129,7 +139,7 @@ public class RoomManager {
             s2.spigot().sendMessage(t);
         }
         if (p != null) {
-            Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala fechada com sucesso");
+            Messages.sendMessage(p, Messages.MessageType.ROOM, "Sala aberta com sucesso");
         }
     }
 
@@ -137,7 +147,7 @@ public class RoomManager {
         Statement s = Main.c.createStatement();
         ResultSet res = s.executeQuery("SELECT Role FROM roomsData WHERE Name='" + r + "';");
         if (res.next()) {
-            if (RankManager.containsRole(p, res.getString("Role"))) {
+            if (RankManager.containsRole(p.getName(), res.getString("Role"))) {
                 return true;
             }
         }
@@ -207,7 +217,7 @@ public class RoomManager {
                             setRoom(s, r, bb);
                             Messages.sendMessage(s, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
                         } else {
-                            setRoom(s, r, getBestRoom(s, getBestRoom(p, "Hub")));
+                            setRoom(s, r, getBestRoom(s, getBestRoom(p, Main.phub)));
                             Messages.sendMessage(s, Messages.MessageType.ROOM, "A sala que você estava agora esta reiniciando. Você foi movido para outra sala.");
                         }
                     }

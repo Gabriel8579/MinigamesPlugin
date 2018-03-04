@@ -1,5 +1,6 @@
 package minigames.util;
 
+import minigames.main.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,12 +16,13 @@ public class AdmCommand implements CommandExecutor {
             return false;
         }
         Player p = (Player) sender;
-        if (!RankManager.containsRole(p, "Administrador")) {
+        if (!RankManager.containsRole(p.getName(), "Administrador")) {
             p.sendMessage("§4Permissão> §cVocê não pode usar este comando!");
             return false;
         }
         if (args.length == 0) {
             p.sendMessage("§6ADM> §bPossíveis argumentos");
+            p.sendMessage("§6ADM> §b=-=-=-=Edição de Salas=-=-=-=");
             p.sendMessage("§6ADM> §b-createroom <nome> <mundo> <cargo> <aberta>: Cria uma nova sala;");
             p.sendMessage("§6ADM> §b-closeroom <nome>: Fecha a sala;");
             p.sendMessage("§6ADM> §b-openroom <nome>: Abre a sala;");
@@ -28,6 +30,10 @@ public class AdmCommand implements CommandExecutor {
             p.sendMessage("§6ADM> §b-sendroom <player> <nome>: Envia um player a uma sala;");
             p.sendMessage("§6ADM> §b-roomset <nome/world/role> <novo valor>: Edita um parâmetro da sala;");
             p.sendMessage("§6ADM> §b-deleteroom <nome>: Deleta uma sala.");
+            p.sendMessage("§6ADM> §b=-=-=-=Edição de Cargos=-=-=-=");
+            p.sendMessage("§6ADM> §b-setrole <nome> <cargo>: Remove todos os cargos e seta para este.");
+            p.sendMessage("§6ADM> §b-giverole <nome> <cargo>: Adiciona um cargo a um jogador");
+            p.sendMessage("§6ADM> §b-remrole <nome> <cargo>: Remove um cargo de um jogador");
             return false;
         }
         if (args.length > 0) {
@@ -118,6 +124,57 @@ public class AdmCommand implements CommandExecutor {
                     return false;
                 }
                 RoomManager.restartRoom(p, args[1]);
+                return false;
+            }
+            if (args[0].equalsIgnoreCase("setrole")) {
+                if (args.length != 3) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-setrole <nome> <cargo>: Remove todos os cargos e seta para este.");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome do jogador;");
+                    p.sendMessage("§6ADM> §b--<cargo>: Nome do cargo;");
+                    return false;
+                }
+                try {
+                    if (RankManager.setRole(args[1], args[2])) {
+                        Messages.sendMessage(p, Messages.MessageType.ROLE, "Difinido cargo " + args[2] + " de " + args[1]);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+            if (args[0].equalsIgnoreCase("giverole")) {
+                if (args.length != 3) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-giverole <nome> <cargo>: Adiciona um cargo a um jogador");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome do jogador;");
+                    p.sendMessage("§6ADM> §b--<cargo>: Nome do cargo;");
+                    return false;
+                }
+                try {
+                    if (RankManager.giveRole(args[1], args[2])) {
+                        Messages.sendMessage(p, Messages.MessageType.ROLE, "Dado cargo " + args[2] + " para " + args[1]);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+            if (args[0].equalsIgnoreCase("remrole")) {
+                if (args.length != 3) {
+                    p.sendMessage("§6ADM> §bPossíveis argumentos");
+                    p.sendMessage("§6ADM> §b-remrole <nome> <cargo>: Remove um cargo de um jogador");
+                    p.sendMessage("§6ADM> §b--<nome>: Nome do jogador;");
+                    p.sendMessage("§6ADM> §b--<cargo>: Nome do cargo;");
+                    return false;
+                }
+                try {
+                    if (RankManager.removeRole(args[1], args[2])) {
+                        Messages.sendMessage(p, Messages.MessageType.ROLE, "Removido cargo " + args[2] + " de " + args[1]);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 return false;
             }
 

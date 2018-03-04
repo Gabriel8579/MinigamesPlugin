@@ -79,6 +79,12 @@ public class DataBase
                 " World VARCHAR (64) NOT NULL," +
                 " Open TINYINT (1)," +
                 " Role VARCHAR(64));";
+        String sql4 = "CREATE TABLE IF NOT EXISTS tntwarsData (" +
+                " id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " Name VARCHAR(36) NOT NULL," +
+                " Room VARCHAR(25) NOT NULL," +
+                " Min INT(3)," +
+                " Max INT(3));";
 
         try
         {
@@ -86,6 +92,7 @@ public class DataBase
             st.execute(sql);
             st.execute(sql2);
             st.execute(sql3);
+            st.execute(sql4);
             st.close();
         }
         catch (SQLException e)
