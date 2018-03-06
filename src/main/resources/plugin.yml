@@ -9,3 +9,5 @@ commands:
     description: Entre em uma sala ou veja em qual sala voce esta.
   adm:
     description: Comando para administradores.
+  admgame:
+    description: Comando para administradores.

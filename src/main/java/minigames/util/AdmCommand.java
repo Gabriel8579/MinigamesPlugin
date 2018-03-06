@@ -16,7 +16,7 @@ public class AdmCommand implements CommandExecutor {
             return false;
         }
         Player p = (Player) sender;
-        if (!RankManager.containsRole(p.getName(), "Administrador")) {
+        if (!RankManager.containsRole(p.getName(), "Administrador") || !p.isOp()) {
             p.sendMessage("§4Permissão> §cVocê não pode usar este comando!");
             return false;
         }

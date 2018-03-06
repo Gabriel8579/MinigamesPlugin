@@ -4,14 +4,19 @@ import minigames.date.Date;
 import minigames.events.Join;
 import minigames.tntwars.TntWars;
 import minigames.util.AdmCommand;
+import minigames.util.AdmGameCommand;
 import minigames.util.RoomCommand;
+import minigames.util.Scoreboard;
 import minigames.worlds.WorldCommand;
 import minigames.worlds.WorldGui;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +34,34 @@ public class Main extends JavaPlugin {
     public static String phub = null;
     public static String ptnt = null;
     public static Map<String, TntWars.State> tntwars = new HashMap<String, TntWars.State>();
+    public static YamlConfiguration y = null;
+    public static File f2;
+    public static Map<Player, Scoreboard> score = new HashMap<Player, Scoreboard>();
+
+    public static File getFileTnt() {
+        return f2;
+    }
+
+    public static YamlConfiguration getConfigTnt() {
+        return y;
+    }
+
     @Override
     public void onEnable() {
         File f = new File(getDataFolder() + "/config.yml");
+        File dir = new File(getDataFolder() + "/tntwars");
+        f2 = new File(getDataFolder() + "/tntwars", "arenas.yml");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        if (!f2.exists()) {
+            try {
+                f2.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        y = YamlConfiguration.loadConfiguration(f2);
         if (!f.exists()) {
             try {
                 f.createNewFile();
@@ -44,7 +74,7 @@ public class Main extends JavaPlugin {
             saveConfig();
         }
         phub = getConfig().getString("config.prefix.hub");
-        phub = getConfig().getString("config.prefix.tnt");
+        ptnt = getConfig().getString("config.prefix.tnt");
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new WorldGui(), this);
         pl = this;
@@ -56,6 +86,7 @@ public class Main extends JavaPlugin {
         getCommand("mundo").setExecutor(new WorldCommand());
         getCommand("sala").setExecutor(new RoomCommand());
         getCommand("adm").setExecutor(new AdmCommand());
+        getCommand("admgame").setExecutor(new AdmGameCommand());
         for(World w : Bukkit.getWorlds()){
             if(!w.getName().contains("_nether") && !w.getName().contains("_end")) {
                 Statement st = null;
@@ -99,7 +130,18 @@ public class Main extends JavaPlugin {
         super.onEnable();
     }
 
+    public void loadUpdater() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    Scoreboard s = score.get(p);
+                    s.update();
+                }
 
+            }
+        }.runTaskTimer(this, 0, 1);
+    }
     @Override
     public void onDisable() {
         pl = null;

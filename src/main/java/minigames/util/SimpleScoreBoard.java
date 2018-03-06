@@ -1,25 +1,8 @@
 package minigames.util;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
-
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 public class SimpleScoreBoard {
 
-    private Scoreboard scoreboard;
+    /*private Scoreboard scoreboard;
 
     private String title;
     private Map<String, Integer> scores;
@@ -101,6 +84,6 @@ public class SimpleScoreBoard {
     public void send(Player... players) {
         for (Player p : players)
             p.setScoreboard(scoreboard);
-    }
+    }*/
 
 }

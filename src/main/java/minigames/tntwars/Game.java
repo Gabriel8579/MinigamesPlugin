@@ -1,4 +1,7 @@
 package minigames.tntwars;
 
-public class Game {
+import org.bukkit.event.Listener;
+
+public class Game implements Listener {
+
 }

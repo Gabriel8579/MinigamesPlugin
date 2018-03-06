@@ -3,6 +3,7 @@ package minigames.events;
 import minigames.main.Main;
 import minigames.util.RankManager;
 import minigames.util.RoomManager;
+import minigames.util.Scoreboard;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,6 +31,10 @@ public class Join implements Listener {
         if (br != null) {
             RoomManager.setRoom(p, "???", br);
         }
+        Scoreboard s2 = new Scoreboard(p);
+        Main.score.put(p, s2);
+        s2.build();
+
 
     }
 
